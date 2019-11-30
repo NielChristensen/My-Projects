@@ -1,0 +1,128 @@
+---
+title: "PSAT"
+output: html_document
+---
+
+
+```{r}
+library(car)
+library(readxl)
+
+
+mergedtable_2_ <- read_excel("mergedtable (2).xlsx")
+df <- mergedtable_2_
+df <- as.data.frame(na.omit(df))
+
+
+#FIRST MODEL: NOT SIGNIFICANT
+model <- lm(`overall product satisfaction` ~ `Panel Online Percent` + `Camera Online Percent` + `Video Load Time (outliers excluded)` + `Video Load Success Rate` + `Z-Wave Success Rate` + `Arms` + `Alarms` + `Custom Rules Enabled` + `App Interactions` + `Cameras` + `Cameras with Playback` + `Locks` + `Thermostats`, data=df)
+
+#check for influencial: cooks.distance 
+
+influence.measures(model, infl = influence(model))
+
+cooksd <-cooks.distance(model)
+plot(cooksd, pch="*", cex=2, main="Influential Obs by Cooks distance")  # plot cook's distance
+abline(h = 4*mean(cooksd, na.rm=T), col="red")  # add cutoff line
+text(x=1:length(cooksd)+1, y=cooksd, labels=ifelse(cooksd>4*mean(cooksd, na.rm=T),names(cooksd),""), col="red")  # add labels
+influential <- as.numeric(names(cooksd)[(cooksd > 4*mean(cooksd, na.rm=T))])  # influential row numbers
+influential
+
+# remove rows in r by row number
+cleandf <- df[-c(34,41,139,166,268,398,406,426,431,445,491,
+                 530,  669,  794,  812,  957,  965,  967, 1076, 1096,
+                 1107, 1184, 1361, 1392, 1573, 1785, 1837, 1841, 1911,
+                 1928,2053, 2154, 2190, 2275, 2292, 2323, 2382, 2415,
+                 2417, 2478),] 
+
+
+#check multicolinearity
+vif(model) # variance inflation factors
+sqrt(vif(model)) > 2 # problem?
+
+
+#check homoscedasticity
+ncvTest(model)
+spreadLevelPlot(model)
+
+#durbanwatsontest the model make sure it's between 1-3
+durbinWatsonTest(model)
+
+
+#Second Model
+
+model2 <- lm(`overall product satisfaction` ~ `Panel Online Percent` + `Camera Online Percent` + `Video Load Time (outliers excluded)` + `Video Load Success Rate` + `Z-Wave Success Rate` + `Arms` + `Alarms` + `Custom Rules Enabled` + `App Interactions` + `Cameras` + `Cameras with Playback` + `Locks` + `Thermostats`, data=cleandf)
+
+summary(model2)
+
+model3 <- lm(`overall product satisfaction` ~ `Panel Online Percent` + `Camera Online Percent` + `Arms` + `Alarms` + `App Interactions`, data=cleandf)
+
+summary(model3)
+
+modelappint <- lm(`overall product satisfaction` ~ `App Interactions`, data=cleandf)
+summary(modelappint)
+
+modelappused <- lm(`overall product satisfaction` ~ `App Used`, data=cleandf)
+summary(modelappused)
+
+#plotting
+require(ggplot2)
+
+ggplot(df, aes(x = `overall product satisfaction`, y = `Panel Online Percent`)) + 
+  geom_histogram() + stat_smooth(method = "lm", col = "red") + theme_minimal() +
+  ggtitle("product satisfaction")
+
+hist(df$`overall product satisfaction`)
+hist(df$`Camera Online Percent`)
+hist(df$`Camera Online Percent`)
+hist(df$`Panel Online Percent`)
+hist(df$`Panel Online Percent`)
+hist(df$`Panel Online Percent`)
+
+`Custom Rules Enabled` 
+
+ggplot(df, aes(x = `overall product satisfaction`, y = `Custom Rules Enabled` )) + 
+  geom_density() + stat_smooth(method = "lm", col = "red") + theme_minimal() +
+  ggtitle("product satisfaction")
+
+ggplot(df, aes(x = `overall product satisfaction`, y = `App Interactions`)) + 
+  geom_point() + stat_smooth(method = "lm", col = "red") + theme_minimal() +
+  ggtitle("product satisfaction")
+
+ggplot(df, aes(x = `overall product satisfaction`, y = `Camera Online Percent`)) + 
+  geom_point() + stat_smooth(method = "lm", col = "red") + theme_minimal() +
+  ggtitle("product satisfaction")
+
+ggplot(df, aes(x = `overall product satisfaction`, y = `Video Load Success Rate`)) + 
+  geom_point() + stat_smooth(method = "lm", col = "red") + theme_minimal() +
+  ggtitle("product satisfaction")
+
+ggplot(df, aes(x = `overall product satisfaction`, y = `Arms`)) + 
+  geom_point() + stat_smooth(method = "lm", col = "red") + theme_minimal() +
+  ggtitle("product satisfaction")
+
+ggplot(df, aes(x = `overall product satisfaction`, y = `Alarms`)) + 
+  geom_point() + stat_smooth(method = "lm", col = "red") + theme_minimal() +
+  ggtitle("product satisfaction")
+
+ggplot(df, aes(x = `overall product satisfaction`, y = `App Interactions`)) + 
+  geom_point() + stat_smooth(method = "lm", col = "red") + theme_minimal() +
+  ggtitle("product satisfaction")
+
+ggplot(df, aes(x = `overall product satisfaction`, y = `Cameras with Playback`)) + 
+  geom_point() + stat_smooth(method = "lm", col = "red") + theme_minimal() +
+  ggtitle("product satisfaction")
+
+
+```
+
+
+```{r}
+
+```
+
+
+
+```{r}
+
+```
